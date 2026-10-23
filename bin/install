@@ -1,0 +1,320 @@
+#!/bin/bash
+# @parseArger-begin
+# @parseArger-help "repack install command" --option "help" --short-option "h"
+# @parseArger-verbose --option "verbose" --level "0" --quiet-option "quiet"
+_has_colors=0
+if [ -t 1 ]; then # Check if stdout is a terminal
+	ncolors=$(tput colors 2>/dev/null)
+	if [ -n "$ncolors" ] && [ "$ncolors" -ge 8 ]; then
+		_has_colors=1
+	fi
+fi
+# @parseArger-declarations
+# @parseArger pos source "repack setup.exe or the directory containing it" --complete "file"
+# @parseArger pos games-root "root directory holding installed games" --complete "directory"
+# @parseArger pos title "game title, used for GAMEID lookup and install folder"
+# @parseArger pos install-name "folder name under games-root (default: sanitized title)" --optional
+# @parseArger opt proton "Proton build passed to umu-run, env REPACK_PROTON (default: GE-Proton)" --short p
+# @parseArger opt gameid "force a umu GAMEID and skip the database lookup" --short g
+# @parseArger flag very-silent "run the installer fully headless (/VERYSILENT instead of /SILENT)"
+# @parseArger-declarations-end
+
+# @parseArger-utils
+_helpHasBeenPrinted=1;
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)";
+# @parseArger-utils-end
+
+# @parseArger-parsing
+
+__cli_arg_count=$#;
+
+die()
+{
+	local _ret=1
+    if [[ -n "$2" ]] && [[ "$2" =~ ^[0-9]+$ ]]; then
+   	_ret="$2"
+    fi
+	test "${_PRINT_HELP:-no}" = yes && print_help >&2
+	log "$1" -3 >&2
+	exit "${_ret}"
+}
+
+
+begins_with_short_option()
+{
+	local first_option all_short_options=''
+	first_option="${1:0:1}"
+	test "$all_short_options" = "${all_short_options/$first_option/}" && return 1 || return 0
+}
+
+# POSITIONALS ARGUMENTS
+_positionals=();
+_optional_positionals=();
+_arg_source="";
+_arg_games_root="";
+_arg_title="";
+_arg_install_name="";
+_optional_positionals+=("_arg_install_name");
+# OPTIONALS ARGUMENTS
+_arg_proton=
+_arg_gameid=
+# FLAGS
+_arg_very_silent="off"
+# NESTED
+_verbose_level="0";
+
+
+
+print_help()
+{
+	_triggerSCHelp=1;
+
+	if [[ "$_helpHasBeenPrinted" == "1" ]]; then
+		_helpHasBeenPrinted=0;
+		echo -e "repack install command:"
+	echo -e "	source: repack setup.exe or the directory containing it"
+	echo -e "	games-root: root directory holding installed games"
+	echo -e "	title: game title, used for GAMEID lookup and install folder"
+	echo -e "	install-name: folder name under games-root (default: sanitized title), optional"
+	echo -e "	-p, --proton <proton>: Proton build passed to umu-run, env REPACK_PROTON (default: GE-Proton)"
+	echo -e "	-g, --gameid <gameid>: force a umu GAMEID and skip the database lookup"
+	echo -e "	--very-silent|--no-very-silent: run the installer fully headless (/VERYSILENT instead of /SILENT)"
+	echo -e "Usage :
+	$0 <source> <games-root> <title> [install-name] [--proton <value>] [--gameid <value>] [--[no-]very-silent]";
+	fi
+
+}
+
+log() {
+	local _arg_msg="${1}";
+	local _arg_level="${2:-0}";
+	if [ "${_arg_level}" -le "${_verbose_level}" ]; then
+		case "$_arg_level" in
+			-3)
+				_arg_COLOR="\033[0;31m";
+				;;
+			-2)
+				_arg_COLOR="\033[0;33m";
+				;;
+			-1)
+				_arg_COLOR="\033[1;33m";
+				;;
+			1)
+				_arg_COLOR="\033[0;32m";
+				;;
+			2)
+				_arg_COLOR="\033[1;36m";
+				;;
+			3)
+				_arg_COLOR="\033[0;36m";
+				;;
+			*)
+				_arg_COLOR="\033[0m";
+				;;
+		esac
+		if [ "${_has_colors}" == "1" ]; then
+			echo -e "${_arg_COLOR}${_arg_msg}\033[0m";
+		else
+			echo "${_arg_msg}";
+		fi
+	fi
+}
+
+parse_commandline()
+{
+	_positionals_count=0
+	while test $# -gt 0
+	do
+		_key="$1"
+		case "$_key" in
+			-p|--proton)
+				test $# -lt 2 && die "Missing value for the option: '$_key'" 1
+				_arg_proton="$2"
+				shift
+				;;
+			--proton=*)
+				_arg_proton="${_key##--proton=}"
+				;;
+			-p*)
+				_arg_proton="${_key##-p}"
+				;;
+			
+			-g|--gameid)
+				test $# -lt 2 && die "Missing value for the option: '$_key'" 1
+				_arg_gameid="$2"
+				shift
+				;;
+			--gameid=*)
+				_arg_gameid="${_key##--gameid=}"
+				;;
+			-g*)
+				_arg_gameid="${_key##-g}"
+				;;
+			
+			--very-silent)
+				_arg_very_silent="on"
+				;;
+			--no-very-silent)
+				_arg_very_silent="off"
+				;;
+			-h|--help)
+				print_help;
+				exit 0;
+				;;
+			-h*)
+				print_help;
+				exit 0;
+				;;
+			--verbose)
+				if [ $# -lt 2 ];then
+					_verbose_level="$((_verbose_level + 1))";
+				else
+					_verbose_level="$2";
+					shift;
+				fi
+				;;
+			--quiet)
+				if [ $# -lt 2 ];then
+					_verbose_level="$((_verbose_level - 1))";
+				else
+					_verbose_level="-$2";
+					shift;
+				fi
+				;;
+			
+				*)
+				_last_positional="$1"
+				_positionals+=("$_last_positional")
+				_positionals_count=$((_positionals_count + 1))
+				;;
+		esac
+		shift
+	done
+}
+
+
+handle_passed_args_count()
+{
+	local _required_args_string="source games-root title"
+	if [ "${_positionals_count}" -gt 4 ] && [ "$_helpHasBeenPrinted" == "1" ];then
+		_PRINT_HELP=yes die "FATAL ERROR: There were spurious positional arguments --- we expect at most 4 (namely: $_required_args_string), but got ${_positionals_count} (the last one was: '${_last_positional}').\n\t${_positionals[*]}" 1
+	fi
+	if [ "${_positionals_count}" -lt 3 ] && [ "$_helpHasBeenPrinted" == "1" ];then
+		_PRINT_HELP=yes die "FATAL ERROR: Not enough positional arguments - we require at least 3 (namely: $_required_args_string), but got only ${_positionals_count}.
+	${_positionals[*]}" 1;
+	fi
+}
+
+
+assign_positional_args()
+{
+	local _positional_name _shift_for=$1;
+	_positional_names="_arg_source _arg_games_root _arg_title _arg_install_name ";
+	shift "$_shift_for"
+	for _positional_name in ${_positional_names};do
+		test $# -gt 0 || break;
+		eval "if [ \"\$_one_of${_positional_name}\" != \"\" ];then [[ \"\${_one_of${_positional_name}[*]}\" =~ \"\${1}\" ]];fi" || die "${_positional_name} must be one of: $(eval "echo \"\${_one_of${_positional_name}[*]}\"")" 1;
+		local _match_var="_match${_positional_name}";
+		local _regex="${!_match_var}";
+		if [ -n "$_regex" ]; then
+			[[ "${1}" =~ $_regex ]] || die "${_positional_name} does not match pattern: $_regex"
+		fi
+		eval "$_positional_name=\${1}" || die "Error during argument parsing, possibly an ParseArger bug." 1;
+		shift;
+	done
+}
+
+print_debug()
+{
+	print_help
+	# shellcheck disable=SC2145
+	echo "DEBUG: $0 $@";
+	
+	echo -e "	source: ${_arg_source}";
+	echo -e "	games-root: ${_arg_games_root}";
+	echo -e "	title: ${_arg_title}";
+	echo -e "	install-name: ${_arg_install_name}";
+	echo -e "	proton: ${_arg_proton}";
+	echo -e "	gameid: ${_arg_gameid}";
+	echo -e "	very-silent: ${_arg_very_silent}";
+
+}
+
+
+on_interrupt() {
+	die Process aborted! 130;
+}
+
+
+parse_commandline "$@";
+handle_passed_args_count;
+assign_positional_args 1 "${_positionals[@]}";
+trap on_interrupt INT;
+
+
+
+
+# @parseArger-parsing-end
+# print_debug "$@"
+# @parseArger-end
+source "$_SCRIPT_DIR/../lib/common.sh"
+set -o pipefail
+
+need_umu
+need_index_deps
+
+root=$(realpath -m "$_arg_games_root")
+title=$_arg_title
+install_name=${_arg_install_name:-$(sanitize "$title")}
+
+setup=$_arg_source
+if [[ -d $setup ]]; then
+	setup=$(find "$setup" -maxdepth 1 -type f -iname 'setup.exe' | head -1)
+	[[ -n $setup ]] || setup=$(find "$_arg_source" -maxdepth 1 -type f -iregex '.*/setup-[0-9]+\.exe' | sort | head -1)
+	[[ -n $setup ]] || die "no setup.exe found in $_arg_source"
+fi
+[[ -f $setup ]] || die "setup not found: $setup"
+setup=$(realpath "$setup")
+
+gdir=$root/$install_name
+[[ -e $gdir ]] && die "$gdir already exists (already installed? see: repack list — or remove it to retry)"
+
+wname=$(winname "$title")
+resolve_gameid "$title" "${_arg_gameid:-${REPACK_GAMEID:-}}"
+proton=${_arg_proton:-${REPACK_PROTON:-$REPACK_PROTON_DEFAULT}}
+silent_flag=/SILENT
+[[ $_arg_very_silent == "on" ]] && silent_flag=/VERYSILENT
+
+prefix=$gdir/prefix
+mkdir -p "$prefix" || die "cannot create $prefix"
+log "Installing '$title' into $prefix (slow decompression is normal — go get coffee)" 1
+env WINEPREFIX="$prefix" GAMEID="$gameid" STORE="$store" PROTONPATH="$proton" \
+	umu-run "$setup" "$silent_flag" /SUPPRESSMSGBOXES /NORESTART "/DIR=C:\\games\\$wname" \
+	|| die "installer failed — retry interactively with:
+env WINEPREFIX=$prefix GAMEID=$gameid STORE=$store PROTONPATH=$proton umu-run \"$setup\""
+
+# locate the game dir and its main exe (biggest exe, minus installer junk)
+gwin=$prefix/drive_c/games/$wname
+if [[ ! -d $gwin ]]; then
+	gwin=$(find "$prefix/drive_c" -maxdepth 4 -type d -iname "${wname}*" 2>/dev/null | head -1) || true
+fi
+scan=${gwin:-$prefix/drive_c}
+[[ -n ${gwin:-} && -d $gwin ]] || rp_warn "C:\\games\\$wname not found — scanning the whole prefix for the exe"
+exe=$(find "$scan" -type f -iname '*.exe' -printf '%s\t%p\n' 2>/dev/null | sort -rn | cut -f2- | grep -Eiv "$REPACK_EXE_JUNK" | head -1) || true
+[[ -n $exe ]] || rp_warn "no main exe detected — launch later with: repack run $install_name --exe <path>"
+
+size=$(du -sh "$scan" 2>/dev/null | cut -f1)
+index_set "$install_name" "$(jq -n \
+	--arg t "$title" --arg g "$gameid" --arg s "$store" --arg d "$gdir" --arg p "$prefix" \
+	--arg w "${gwin:-}" --arg e "${exe:-}" --arg pr "$proton" --arg sz "$size" --arg ts "$(date -Iseconds)" \
+	'{title:$t, gameid:$g, store:$s, dir:$d, prefix:$p, gamedir:$w, exe:$e,
+	size:$sz, proton:$pr, installed:$ts, last_played:null}')"
+
+echo
+echo "Installed: $title"
+echo "	install name : $install_name"
+echo "	game id      : $gameid (store=$store)"
+echo "	game dir     : ${gwin:-<not found>}"
+echo "	main exe     : ${exe:-<not detected>}"
+if [[ -n $exe ]]; then echo "	play         : repack run $install_name"; fi
+exit 0

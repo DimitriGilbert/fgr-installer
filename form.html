@@ -1,0 +1,1049 @@
+<form id="repack">
+<h2>repack form</h2>
+<div class="form-group">
+	<label for="target" class="form-label">target</label>
+	<span class="input-help">repack subcommand</span>
+	<select pa-type="pos" name="target" id="target" required class="form-select">
+
+		<option value="id">id</option>
+		<option value="install">install</option>
+		<option value="list">list</option>
+		<option value="rm">rm</option>
+		<option value="run">run</option>
+		<option value="tricks">tricks</option>
+	</select>
+</div><button id="repack_parse_btn">Parse</button>
+	<pre id="repack_result" contenteditable=true ></pre>
+	<pre id="repack_server_response"></pre>
+</form><div id="_subcommands">
+	<h3>Subcommand forms</h3>
+<div class="d-none subcmd-container-target" id="target_id_container"><form id="bin_id">
+<h2>id form</h2>
+<button id="bin_id_parse_btn">Parse</button>
+	<pre id="bin_id_result" contenteditable=true ></pre>
+	<pre id="bin_id_server_response"></pre>
+</form>
+<script type="text/javascript">
+	function bin_id_parse(__form) { 
+		let bin_id_frm = new FormData(__form);
+		let out = '';
+		for(const inp of bin_id_frm.keys()) {
+			const ielt = document.getElementById(inp);
+			switch(ielt.getAttribute('pa-type')) {
+				case 'pos':
+					if (/[\s!@#$%^&*()_+=[\]{};':"\|,.<>/?]/.test(bin_id_frm.get(inp))) {
+						out+=' "'+bin_id_frm.get(inp)+'"';
+					} else {
+						out+=' '+bin_id_frm.get(inp);
+					}
+					break;
+				case 'opt':
+					if(bin_id_frm.get(inp) !== '') {
+						if (ielt.hasAttribute('pa-repeat')) {
+							for(const val of bin_id_frm.get(inp).split(`
+`)) {
+								out+=' --'+inp+' "'+val+'"';
+							}
+						} else {
+							out+=' --'+inp+' "'+bin_id_frm.get(inp)+'"';
+						}
+					}
+					break;
+				case 'flag':
+					if(ielt.checked === true) {
+						out+=' --'+inp;
+					} else {
+						out+=' --no-'+inp;
+					}
+					break;
+			}
+		}
+		// document.getElementById('repack_parse_btn').parentNode.dispatchEvent(new Event('submit'));
+		document.getElementById('repack_parse_btn').click();
+		out=document.getElementById('repack_result').innerHTML+out;
+		document.getElementById('repack_result').innerHTML=out;
+		
+		document.getElementById('bin_id_result').innerHTML=out;
+	}
+document.getElementById('bin_id').addEventListener('submit', function(e) {
+				e.preventDefault();
+				e.target.checkValidity();
+				bin_id_parse(e.target);
+				if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+					&& (window.location.protocol === 'http:' || window.location.protocol === 'https:')
+					&& (window.location.port !== '80' && window.location.port !== '443')) {
+					fetch(window.location.protocol+'//' + window.location.hostname + ':' + window.location.port + '/form', {
+						method: 'POST',
+						body:document.getElementById('repack_result').innerHTML.replace(/id /g, '')
+					})
+						.then(response => response.text())
+						.then(result => {
+							document.getElementById('bin_id_server_response').innerHTML = result;
+						})
+						.catch(error => {
+							document.getElementById('bin_id_server_response').innerHTML = error;
+						});
+				}
+			});
+</script></div><div class="d-none subcmd-container-target" id="target_install_container"><form id="bin_install">
+<h2>install form</h2>
+<button id="bin_install_parse_btn">Parse</button>
+	<pre id="bin_install_result" contenteditable=true ></pre>
+	<pre id="bin_install_server_response"></pre>
+</form>
+<script type="text/javascript">
+	function bin_install_parse(__form) { 
+		let bin_install_frm = new FormData(__form);
+		let out = '';
+		for(const inp of bin_install_frm.keys()) {
+			const ielt = document.getElementById(inp);
+			switch(ielt.getAttribute('pa-type')) {
+				case 'pos':
+					if (/[\s!@#$%^&*()_+=[\]{};':"\|,.<>/?]/.test(bin_install_frm.get(inp))) {
+						out+=' "'+bin_install_frm.get(inp)+'"';
+					} else {
+						out+=' '+bin_install_frm.get(inp);
+					}
+					break;
+				case 'opt':
+					if(bin_install_frm.get(inp) !== '') {
+						if (ielt.hasAttribute('pa-repeat')) {
+							for(const val of bin_install_frm.get(inp).split(`
+`)) {
+								out+=' --'+inp+' "'+val+'"';
+							}
+						} else {
+							out+=' --'+inp+' "'+bin_install_frm.get(inp)+'"';
+						}
+					}
+					break;
+				case 'flag':
+					if(ielt.checked === true) {
+						out+=' --'+inp;
+					} else {
+						out+=' --no-'+inp;
+					}
+					break;
+			}
+		}
+		// document.getElementById('repack_parse_btn').parentNode.dispatchEvent(new Event('submit'));
+		document.getElementById('repack_parse_btn').click();
+		out=document.getElementById('repack_result').innerHTML+out;
+		document.getElementById('repack_result').innerHTML=out;
+		
+		document.getElementById('bin_install_result').innerHTML=out;
+	}
+document.getElementById('bin_install').addEventListener('submit', function(e) {
+				e.preventDefault();
+				e.target.checkValidity();
+				bin_install_parse(e.target);
+				if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+					&& (window.location.protocol === 'http:' || window.location.protocol === 'https:')
+					&& (window.location.port !== '80' && window.location.port !== '443')) {
+					fetch(window.location.protocol+'//' + window.location.hostname + ':' + window.location.port + '/form', {
+						method: 'POST',
+						body:document.getElementById('repack_result').innerHTML.replace(/install /g, '')
+					})
+						.then(response => response.text())
+						.then(result => {
+							document.getElementById('bin_install_server_response').innerHTML = result;
+						})
+						.catch(error => {
+							document.getElementById('bin_install_server_response').innerHTML = error;
+						});
+				}
+			});
+</script></div><div class="d-none subcmd-container-target" id="target_list_container"><form id="bin_list">
+<h2>list form</h2>
+<button id="bin_list_parse_btn">Parse</button>
+	<pre id="bin_list_result" contenteditable=true ></pre>
+	<pre id="bin_list_server_response"></pre>
+</form>
+<script type="text/javascript">
+	function bin_list_parse(__form) { 
+		let bin_list_frm = new FormData(__form);
+		let out = '';
+		for(const inp of bin_list_frm.keys()) {
+			const ielt = document.getElementById(inp);
+			switch(ielt.getAttribute('pa-type')) {
+				case 'pos':
+					if (/[\s!@#$%^&*()_+=[\]{};':"\|,.<>/?]/.test(bin_list_frm.get(inp))) {
+						out+=' "'+bin_list_frm.get(inp)+'"';
+					} else {
+						out+=' '+bin_list_frm.get(inp);
+					}
+					break;
+				case 'opt':
+					if(bin_list_frm.get(inp) !== '') {
+						if (ielt.hasAttribute('pa-repeat')) {
+							for(const val of bin_list_frm.get(inp).split(`
+`)) {
+								out+=' --'+inp+' "'+val+'"';
+							}
+						} else {
+							out+=' --'+inp+' "'+bin_list_frm.get(inp)+'"';
+						}
+					}
+					break;
+				case 'flag':
+					if(ielt.checked === true) {
+						out+=' --'+inp;
+					} else {
+						out+=' --no-'+inp;
+					}
+					break;
+			}
+		}
+		// document.getElementById('repack_parse_btn').parentNode.dispatchEvent(new Event('submit'));
+		document.getElementById('repack_parse_btn').click();
+		out=document.getElementById('repack_result').innerHTML+out;
+		document.getElementById('repack_result').innerHTML=out;
+		
+		document.getElementById('bin_list_result').innerHTML=out;
+	}
+document.getElementById('bin_list').addEventListener('submit', function(e) {
+				e.preventDefault();
+				e.target.checkValidity();
+				bin_list_parse(e.target);
+				if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+					&& (window.location.protocol === 'http:' || window.location.protocol === 'https:')
+					&& (window.location.port !== '80' && window.location.port !== '443')) {
+					fetch(window.location.protocol+'//' + window.location.hostname + ':' + window.location.port + '/form', {
+						method: 'POST',
+						body:document.getElementById('repack_result').innerHTML.replace(/list /g, '')
+					})
+						.then(response => response.text())
+						.then(result => {
+							document.getElementById('bin_list_server_response').innerHTML = result;
+						})
+						.catch(error => {
+							document.getElementById('bin_list_server_response').innerHTML = error;
+						});
+				}
+			});
+</script></div><div class="d-none subcmd-container-target" id="target_rm_container"><form id="bin_rm">
+<h2>rm form</h2>
+<button id="bin_rm_parse_btn">Parse</button>
+	<pre id="bin_rm_result" contenteditable=true ></pre>
+	<pre id="bin_rm_server_response"></pre>
+</form>
+<script type="text/javascript">
+	function bin_rm_parse(__form) { 
+		let bin_rm_frm = new FormData(__form);
+		let out = '';
+		for(const inp of bin_rm_frm.keys()) {
+			const ielt = document.getElementById(inp);
+			switch(ielt.getAttribute('pa-type')) {
+				case 'pos':
+					if (/[\s!@#$%^&*()_+=[\]{};':"\|,.<>/?]/.test(bin_rm_frm.get(inp))) {
+						out+=' "'+bin_rm_frm.get(inp)+'"';
+					} else {
+						out+=' '+bin_rm_frm.get(inp);
+					}
+					break;
+				case 'opt':
+					if(bin_rm_frm.get(inp) !== '') {
+						if (ielt.hasAttribute('pa-repeat')) {
+							for(const val of bin_rm_frm.get(inp).split(`
+`)) {
+								out+=' --'+inp+' "'+val+'"';
+							}
+						} else {
+							out+=' --'+inp+' "'+bin_rm_frm.get(inp)+'"';
+						}
+					}
+					break;
+				case 'flag':
+					if(ielt.checked === true) {
+						out+=' --'+inp;
+					} else {
+						out+=' --no-'+inp;
+					}
+					break;
+			}
+		}
+		// document.getElementById('repack_parse_btn').parentNode.dispatchEvent(new Event('submit'));
+		document.getElementById('repack_parse_btn').click();
+		out=document.getElementById('repack_result').innerHTML+out;
+		document.getElementById('repack_result').innerHTML=out;
+		
+		document.getElementById('bin_rm_result').innerHTML=out;
+	}
+document.getElementById('bin_rm').addEventListener('submit', function(e) {
+				e.preventDefault();
+				e.target.checkValidity();
+				bin_rm_parse(e.target);
+				if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+					&& (window.location.protocol === 'http:' || window.location.protocol === 'https:')
+					&& (window.location.port !== '80' && window.location.port !== '443')) {
+					fetch(window.location.protocol+'//' + window.location.hostname + ':' + window.location.port + '/form', {
+						method: 'POST',
+						body:document.getElementById('repack_result').innerHTML.replace(/rm /g, '')
+					})
+						.then(response => response.text())
+						.then(result => {
+							document.getElementById('bin_rm_server_response').innerHTML = result;
+						})
+						.catch(error => {
+							document.getElementById('bin_rm_server_response').innerHTML = error;
+						});
+				}
+			});
+</script></div><div class="d-none subcmd-container-target" id="target_run_container"><form id="bin_run">
+<h2>run form</h2>
+<button id="bin_run_parse_btn">Parse</button>
+	<pre id="bin_run_result" contenteditable=true ></pre>
+	<pre id="bin_run_server_response"></pre>
+</form>
+<script type="text/javascript">
+	function bin_run_parse(__form) { 
+		let bin_run_frm = new FormData(__form);
+		let out = '';
+		for(const inp of bin_run_frm.keys()) {
+			const ielt = document.getElementById(inp);
+			switch(ielt.getAttribute('pa-type')) {
+				case 'pos':
+					if (/[\s!@#$%^&*()_+=[\]{};':"\|,.<>/?]/.test(bin_run_frm.get(inp))) {
+						out+=' "'+bin_run_frm.get(inp)+'"';
+					} else {
+						out+=' '+bin_run_frm.get(inp);
+					}
+					break;
+				case 'opt':
+					if(bin_run_frm.get(inp) !== '') {
+						if (ielt.hasAttribute('pa-repeat')) {
+							for(const val of bin_run_frm.get(inp).split(`
+`)) {
+								out+=' --'+inp+' "'+val+'"';
+							}
+						} else {
+							out+=' --'+inp+' "'+bin_run_frm.get(inp)+'"';
+						}
+					}
+					break;
+				case 'flag':
+					if(ielt.checked === true) {
+						out+=' --'+inp;
+					} else {
+						out+=' --no-'+inp;
+					}
+					break;
+			}
+		}
+		// document.getElementById('repack_parse_btn').parentNode.dispatchEvent(new Event('submit'));
+		document.getElementById('repack_parse_btn').click();
+		out=document.getElementById('repack_result').innerHTML+out;
+		document.getElementById('repack_result').innerHTML=out;
+		
+		document.getElementById('bin_run_result').innerHTML=out;
+	}
+document.getElementById('bin_run').addEventListener('submit', function(e) {
+				e.preventDefault();
+				e.target.checkValidity();
+				bin_run_parse(e.target);
+				if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+					&& (window.location.protocol === 'http:' || window.location.protocol === 'https:')
+					&& (window.location.port !== '80' && window.location.port !== '443')) {
+					fetch(window.location.protocol+'//' + window.location.hostname + ':' + window.location.port + '/form', {
+						method: 'POST',
+						body:document.getElementById('repack_result').innerHTML.replace(/run /g, '')
+					})
+						.then(response => response.text())
+						.then(result => {
+							document.getElementById('bin_run_server_response').innerHTML = result;
+						})
+						.catch(error => {
+							document.getElementById('bin_run_server_response').innerHTML = error;
+						});
+				}
+			});
+</script></div><div class="d-none subcmd-container-target" id="target_tricks_container"><form id="bin_tricks">
+<h2>tricks form</h2>
+<button id="bin_tricks_parse_btn">Parse</button>
+	<pre id="bin_tricks_result" contenteditable=true ></pre>
+	<pre id="bin_tricks_server_response"></pre>
+</form>
+<script type="text/javascript">
+	function bin_tricks_parse(__form) { 
+		let bin_tricks_frm = new FormData(__form);
+		let out = '';
+		for(const inp of bin_tricks_frm.keys()) {
+			const ielt = document.getElementById(inp);
+			switch(ielt.getAttribute('pa-type')) {
+				case 'pos':
+					if (/[\s!@#$%^&*()_+=[\]{};':"\|,.<>/?]/.test(bin_tricks_frm.get(inp))) {
+						out+=' "'+bin_tricks_frm.get(inp)+'"';
+					} else {
+						out+=' '+bin_tricks_frm.get(inp);
+					}
+					break;
+				case 'opt':
+					if(bin_tricks_frm.get(inp) !== '') {
+						if (ielt.hasAttribute('pa-repeat')) {
+							for(const val of bin_tricks_frm.get(inp).split(`
+`)) {
+								out+=' --'+inp+' "'+val+'"';
+							}
+						} else {
+							out+=' --'+inp+' "'+bin_tricks_frm.get(inp)+'"';
+						}
+					}
+					break;
+				case 'flag':
+					if(ielt.checked === true) {
+						out+=' --'+inp;
+					} else {
+						out+=' --no-'+inp;
+					}
+					break;
+			}
+		}
+		// document.getElementById('repack_parse_btn').parentNode.dispatchEvent(new Event('submit'));
+		document.getElementById('repack_parse_btn').click();
+		out=document.getElementById('repack_result').innerHTML+out;
+		document.getElementById('repack_result').innerHTML=out;
+		
+		document.getElementById('bin_tricks_result').innerHTML=out;
+	}
+document.getElementById('bin_tricks').addEventListener('submit', function(e) {
+				e.preventDefault();
+				e.target.checkValidity();
+				bin_tricks_parse(e.target);
+				if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+					&& (window.location.protocol === 'http:' || window.location.protocol === 'https:')
+					&& (window.location.port !== '80' && window.location.port !== '443')) {
+					fetch(window.location.protocol+'//' + window.location.hostname + ':' + window.location.port + '/form', {
+						method: 'POST',
+						body:document.getElementById('repack_result').innerHTML.replace(/tricks /g, '')
+					})
+						.then(response => response.text())
+						.then(result => {
+							document.getElementById('bin_tricks_server_response').innerHTML = result;
+						})
+						.catch(error => {
+							document.getElementById('bin_tricks_server_response').innerHTML = error;
+						});
+				}
+			});
+</script></div>
+	<script>
+	document.getElementById("target").addEventListener("change", function() {
+		var val = this.value;
+		document.querySelectorAll(".subcmd-container-target").forEach(function(el) {
+			el.classList.add("d-none");
+		});
+		var subcmd = document.getElementById("target_"+val+"_container").classList.remove("d-none");
+	});
+	</script>
+</div>
+</div>
+<script type="text/javascript">
+	function repack_parse(__form) { 
+		let repack_frm = new FormData(__form);
+		let out = 'repack';
+		for(const inp of repack_frm.keys()) {
+			const ielt = document.getElementById(inp);
+			switch(ielt.getAttribute('pa-type')) {
+				case 'pos':
+					if (/[\s!@#$%^&*()_+=[\]{};':"\|,.<>/?]/.test(repack_frm.get(inp))) {
+						out+=' "'+repack_frm.get(inp)+'"';
+					} else {
+						out+=' '+repack_frm.get(inp);
+					}
+					break;
+				case 'opt':
+					if(repack_frm.get(inp) !== '') {
+						if (ielt.hasAttribute('pa-repeat')) {
+							for(const val of repack_frm.get(inp).split(`
+`)) {
+								out+=' --'+inp+' "'+val+'"';
+							}
+						} else {
+							out+=' --'+inp+' "'+repack_frm.get(inp)+'"';
+						}
+					}
+					break;
+				case 'flag':
+					if(ielt.checked === true) {
+						out+=' --'+inp;
+					} else {
+						out+=' --no-'+inp;
+					}
+					break;
+			}
+		}
+		document.getElementById('repack_result').innerHTML=out;
+	}
+document.getElementById('repack').addEventListener('submit', function(e) {
+				e.preventDefault();
+				e.target.checkValidity();
+				repack_parse(e.target);
+				if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+					&& (window.location.protocol === 'http:' || window.location.protocol === 'https:')
+					&& (window.location.port !== '80' && window.location.port !== '443')) {
+					fetch(window.location.protocol+'//' + window.location.hostname + ':' + window.location.port + '/form', {
+						method: 'POST',
+						body:document.getElementById('_result').innerHTML.replace(/repack /g, '')
+					})
+						.then(response => response.text())
+						.then(result => {
+							document.getElementById('repack_server_response').innerHTML = result;
+						})
+						.catch(error => {
+							document.getElementById('repack_server_response').innerHTML = error;
+						});
+				}
+			});
+</script><form id="repack">
+<h2>./repack form</h2>
+<div class="form-group">
+	<label for="target" class="form-label">target</label>
+	<span class="input-help">repack subcommand</span>
+	<select pa-type="pos" name="target" id="target" required class="form-select">
+
+		<option value="id">id</option>
+		<option value="install">install</option>
+		<option value="list">list</option>
+		<option value="rm">rm</option>
+		<option value="run">run</option>
+		<option value="tricks">tricks</option>
+	</select>
+</div><button id="repack_parse_btn">Parse</button>
+	<pre id="repack_result" contenteditable=true ></pre>
+	<pre id="repack_server_response"></pre>
+</form><div id="_subcommands">
+	<h3>Subcommand forms</h3>
+<div class="d-none subcmd-container-target" id="target_id_container"><form id="bin_id">
+<h2>id form</h2>
+<div class="form-group">
+	<label for="title" class="form-label">title</label>
+	<span class="input-help">game title to look up in the umu-database</span>
+	<input pa-type="pos" name="title" id="title" required type="text" class="form-control" />
+</div><button id="bin_id_parse_btn">Parse</button>
+	<pre id="bin_id_result" contenteditable=true ></pre>
+	<pre id="bin_id_server_response"></pre>
+</form>
+<script type="text/javascript">
+	function bin_id_parse(__form) { 
+		let bin_id_frm = new FormData(__form);
+		let out = '';
+		for(const inp of bin_id_frm.keys()) {
+			const ielt = document.getElementById(inp);
+			switch(ielt.getAttribute('pa-type')) {
+				case 'pos':
+					if (/[\s!@#$%^&*()_+=[\]{};':"\|,.<>/?]/.test(bin_id_frm.get(inp))) {
+						out+=' "'+bin_id_frm.get(inp)+'"';
+					} else {
+						out+=' '+bin_id_frm.get(inp);
+					}
+					break;
+				case 'opt':
+					if(bin_id_frm.get(inp) !== '') {
+						if (ielt.hasAttribute('pa-repeat')) {
+							for(const val of bin_id_frm.get(inp).split(`
+`)) {
+								out+=' --'+inp+' "'+val+'"';
+							}
+						} else {
+							out+=' --'+inp+' "'+bin_id_frm.get(inp)+'"';
+						}
+					}
+					break;
+				case 'flag':
+					if(ielt.checked === true) {
+						out+=' --'+inp;
+					} else {
+						out+=' --no-'+inp;
+					}
+					break;
+			}
+		}
+		// document.getElementById('repack_parse_btn').parentNode.dispatchEvent(new Event('submit'));
+		document.getElementById('repack_parse_btn').click();
+		out=document.getElementById('repack_result').innerHTML+out;
+		document.getElementById('repack_result').innerHTML=out;
+		
+		document.getElementById('bin_id_result').innerHTML=out;
+	}
+document.getElementById('bin_id').addEventListener('submit', function(e) {
+				e.preventDefault();
+				e.target.checkValidity();
+				bin_id_parse(e.target);
+				if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+					&& (window.location.protocol === 'http:' || window.location.protocol === 'https:')
+					&& (window.location.port !== '80' && window.location.port !== '443')) {
+					fetch(window.location.protocol+'//' + window.location.hostname + ':' + window.location.port + '/form', {
+						method: 'POST',
+						body:document.getElementById('repack_result').innerHTML.replace(/id /g, '')
+					})
+						.then(response => response.text())
+						.then(result => {
+							document.getElementById('bin_id_server_response').innerHTML = result;
+						})
+						.catch(error => {
+							document.getElementById('bin_id_server_response').innerHTML = error;
+						});
+				}
+			});
+</script></div><div class="d-none subcmd-container-target" id="target_install_container"><form id="bin_install">
+<h2>install form</h2>
+<div class="form-group">
+	<label for="source" class="form-label">source</label>
+	<span class="input-help">repack setup.exe or the directory containing it</span>
+	<input pa-type="pos" name="source" id="source" required type="text" class="form-control" />
+</div><div class="form-group">
+	<label for="games-root" class="form-label">games-root</label>
+	<span class="input-help">root directory holding installed games</span>
+	<input pa-type="pos" name="games-root" id="games-root" required type="text" class="form-control" />
+</div><div class="form-group">
+	<label for="title" class="form-label">title</label>
+	<span class="input-help">game title, used for GAMEID lookup and install folder</span>
+	<input pa-type="pos" name="title" id="title" required type="text" class="form-control" />
+</div><div class="form-group">
+	<label for="install-name" class="form-label">install-name</label>
+	<span class="input-help">folder name under games-root (default: sanitized title)</span>
+	<input pa-type="pos" name="install-name" id="install-name" type="text" class="form-control" />
+</div><div class="form-group">
+	<label for="proton" class="form-label">proton</label>
+	<span class="input-help">Proton build passed to umu-run, env REPACK_PROTON (default: GE-Proton)</span>
+	<input class="form-control" pa-type="opt" name="proton" id="proton" type="text" />
+</div><div class="form-group">
+	<label for="gameid" class="form-label">gameid</label>
+	<span class="input-help">force a umu GAMEID and skip the database lookup</span>
+	<input class="form-control" pa-type="opt" name="gameid" id="gameid" type="text" />
+</div><div class="form-check">
+	<label for="very-silent" class="form-check-label">very-silent</label>
+	<i class="input-help">run the installer fully headless (/VERYSILENT instead of /SILENT)</i>
+	<input class="form-check-input" type="checkbox" role="switch" name="very-silent" id="very-silent" value="very-silent" pa-type="flag" />
+</div><button id="bin_install_parse_btn">Parse</button>
+	<pre id="bin_install_result" contenteditable=true ></pre>
+	<pre id="bin_install_server_response"></pre>
+</form>
+<script type="text/javascript">
+	function bin_install_parse(__form) { 
+		let bin_install_frm = new FormData(__form);
+		let out = '';
+		for(const inp of bin_install_frm.keys()) {
+			const ielt = document.getElementById(inp);
+			switch(ielt.getAttribute('pa-type')) {
+				case 'pos':
+					if (/[\s!@#$%^&*()_+=[\]{};':"\|,.<>/?]/.test(bin_install_frm.get(inp))) {
+						out+=' "'+bin_install_frm.get(inp)+'"';
+					} else {
+						out+=' '+bin_install_frm.get(inp);
+					}
+					break;
+				case 'opt':
+					if(bin_install_frm.get(inp) !== '') {
+						if (ielt.hasAttribute('pa-repeat')) {
+							for(const val of bin_install_frm.get(inp).split(`
+`)) {
+								out+=' --'+inp+' "'+val+'"';
+							}
+						} else {
+							out+=' --'+inp+' "'+bin_install_frm.get(inp)+'"';
+						}
+					}
+					break;
+				case 'flag':
+					if(ielt.checked === true) {
+						out+=' --'+inp;
+					} else {
+						out+=' --no-'+inp;
+					}
+					break;
+			}
+		}
+		// document.getElementById('repack_parse_btn').parentNode.dispatchEvent(new Event('submit'));
+		document.getElementById('repack_parse_btn').click();
+		out=document.getElementById('repack_result').innerHTML+out;
+		document.getElementById('repack_result').innerHTML=out;
+		
+		document.getElementById('bin_install_result').innerHTML=out;
+	}
+document.getElementById('bin_install').addEventListener('submit', function(e) {
+				e.preventDefault();
+				e.target.checkValidity();
+				bin_install_parse(e.target);
+				if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+					&& (window.location.protocol === 'http:' || window.location.protocol === 'https:')
+					&& (window.location.port !== '80' && window.location.port !== '443')) {
+					fetch(window.location.protocol+'//' + window.location.hostname + ':' + window.location.port + '/form', {
+						method: 'POST',
+						body:document.getElementById('repack_result').innerHTML.replace(/install /g, '')
+					})
+						.then(response => response.text())
+						.then(result => {
+							document.getElementById('bin_install_server_response').innerHTML = result;
+						})
+						.catch(error => {
+							document.getElementById('bin_install_server_response').innerHTML = error;
+						});
+				}
+			});
+</script></div><div class="d-none subcmd-container-target" id="target_list_container"><form id="bin_list">
+<h2>list form</h2>
+<div class="form-check">
+	<label for="json" class="form-check-label">json</label>
+	<i class="input-help">print the raw games.json index</i>
+	<input class="form-check-input" type="checkbox" role="switch" name="json" id="json" value="json" pa-type="flag" />
+</div><button id="bin_list_parse_btn">Parse</button>
+	<pre id="bin_list_result" contenteditable=true ></pre>
+	<pre id="bin_list_server_response"></pre>
+</form>
+<script type="text/javascript">
+	function bin_list_parse(__form) { 
+		let bin_list_frm = new FormData(__form);
+		let out = '';
+		for(const inp of bin_list_frm.keys()) {
+			const ielt = document.getElementById(inp);
+			switch(ielt.getAttribute('pa-type')) {
+				case 'pos':
+					if (/[\s!@#$%^&*()_+=[\]{};':"\|,.<>/?]/.test(bin_list_frm.get(inp))) {
+						out+=' "'+bin_list_frm.get(inp)+'"';
+					} else {
+						out+=' '+bin_list_frm.get(inp);
+					}
+					break;
+				case 'opt':
+					if(bin_list_frm.get(inp) !== '') {
+						if (ielt.hasAttribute('pa-repeat')) {
+							for(const val of bin_list_frm.get(inp).split(`
+`)) {
+								out+=' --'+inp+' "'+val+'"';
+							}
+						} else {
+							out+=' --'+inp+' "'+bin_list_frm.get(inp)+'"';
+						}
+					}
+					break;
+				case 'flag':
+					if(ielt.checked === true) {
+						out+=' --'+inp;
+					} else {
+						out+=' --no-'+inp;
+					}
+					break;
+			}
+		}
+		// document.getElementById('repack_parse_btn').parentNode.dispatchEvent(new Event('submit'));
+		document.getElementById('repack_parse_btn').click();
+		out=document.getElementById('repack_result').innerHTML+out;
+		document.getElementById('repack_result').innerHTML=out;
+		
+		document.getElementById('bin_list_result').innerHTML=out;
+	}
+document.getElementById('bin_list').addEventListener('submit', function(e) {
+				e.preventDefault();
+				e.target.checkValidity();
+				bin_list_parse(e.target);
+				if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+					&& (window.location.protocol === 'http:' || window.location.protocol === 'https:')
+					&& (window.location.port !== '80' && window.location.port !== '443')) {
+					fetch(window.location.protocol+'//' + window.location.hostname + ':' + window.location.port + '/form', {
+						method: 'POST',
+						body:document.getElementById('repack_result').innerHTML.replace(/list /g, '')
+					})
+						.then(response => response.text())
+						.then(result => {
+							document.getElementById('bin_list_server_response').innerHTML = result;
+						})
+						.catch(error => {
+							document.getElementById('bin_list_server_response').innerHTML = error;
+						});
+				}
+			});
+</script></div><div class="d-none subcmd-container-target" id="target_rm_container"><form id="bin_rm">
+<h2>rm form</h2>
+<div class="form-group">
+	<label for="name" class="form-label">name</label>
+	<span class="input-help">install name of the game</span>
+	<input pa-type="pos" name="name" id="name" required type="text" class="form-control" />
+</div><div class="form-check">
+	<label for="force" class="form-check-label">force</label>
+	<i class="input-help">delete without asking</i>
+	<input class="form-check-input" type="checkbox" role="switch" name="force" id="force" value="force" pa-type="flag" />
+</div><button id="bin_rm_parse_btn">Parse</button>
+	<pre id="bin_rm_result" contenteditable=true ></pre>
+	<pre id="bin_rm_server_response"></pre>
+</form>
+<script type="text/javascript">
+	function bin_rm_parse(__form) { 
+		let bin_rm_frm = new FormData(__form);
+		let out = '';
+		for(const inp of bin_rm_frm.keys()) {
+			const ielt = document.getElementById(inp);
+			switch(ielt.getAttribute('pa-type')) {
+				case 'pos':
+					if (/[\s!@#$%^&*()_+=[\]{};':"\|,.<>/?]/.test(bin_rm_frm.get(inp))) {
+						out+=' "'+bin_rm_frm.get(inp)+'"';
+					} else {
+						out+=' '+bin_rm_frm.get(inp);
+					}
+					break;
+				case 'opt':
+					if(bin_rm_frm.get(inp) !== '') {
+						if (ielt.hasAttribute('pa-repeat')) {
+							for(const val of bin_rm_frm.get(inp).split(`
+`)) {
+								out+=' --'+inp+' "'+val+'"';
+							}
+						} else {
+							out+=' --'+inp+' "'+bin_rm_frm.get(inp)+'"';
+						}
+					}
+					break;
+				case 'flag':
+					if(ielt.checked === true) {
+						out+=' --'+inp;
+					} else {
+						out+=' --no-'+inp;
+					}
+					break;
+			}
+		}
+		// document.getElementById('repack_parse_btn').parentNode.dispatchEvent(new Event('submit'));
+		document.getElementById('repack_parse_btn').click();
+		out=document.getElementById('repack_result').innerHTML+out;
+		document.getElementById('repack_result').innerHTML=out;
+		
+		document.getElementById('bin_rm_result').innerHTML=out;
+	}
+document.getElementById('bin_rm').addEventListener('submit', function(e) {
+				e.preventDefault();
+				e.target.checkValidity();
+				bin_rm_parse(e.target);
+				if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+					&& (window.location.protocol === 'http:' || window.location.protocol === 'https:')
+					&& (window.location.port !== '80' && window.location.port !== '443')) {
+					fetch(window.location.protocol+'//' + window.location.hostname + ':' + window.location.port + '/form', {
+						method: 'POST',
+						body:document.getElementById('repack_result').innerHTML.replace(/rm /g, '')
+					})
+						.then(response => response.text())
+						.then(result => {
+							document.getElementById('bin_rm_server_response').innerHTML = result;
+						})
+						.catch(error => {
+							document.getElementById('bin_rm_server_response').innerHTML = error;
+						});
+				}
+			});
+</script></div><div class="d-none subcmd-container-target" id="target_run_container"><form id="bin_run">
+<h2>run form</h2>
+<div class="form-group">
+	<label for="name" class="form-label">name</label>
+	<span class="input-help">install name of the game (see: repack list)</span>
+	<input pa-type="pos" name="name" id="name" required type="text" class="form-control" />
+</div><div class="form-group">
+	<label for="exe" class="form-label">exe</label>
+	<span class="input-help">override the recorded main exe (remembered)</span>
+	<input class="form-control" pa-type="opt" name="exe" id="exe" type="text" />
+</div><button id="bin_run_parse_btn">Parse</button>
+	<pre id="bin_run_result" contenteditable=true ></pre>
+	<pre id="bin_run_server_response"></pre>
+</form>
+<script type="text/javascript">
+	function bin_run_parse(__form) { 
+		let bin_run_frm = new FormData(__form);
+		let out = '';
+		for(const inp of bin_run_frm.keys()) {
+			const ielt = document.getElementById(inp);
+			switch(ielt.getAttribute('pa-type')) {
+				case 'pos':
+					if (/[\s!@#$%^&*()_+=[\]{};':"\|,.<>/?]/.test(bin_run_frm.get(inp))) {
+						out+=' "'+bin_run_frm.get(inp)+'"';
+					} else {
+						out+=' '+bin_run_frm.get(inp);
+					}
+					break;
+				case 'opt':
+					if(bin_run_frm.get(inp) !== '') {
+						if (ielt.hasAttribute('pa-repeat')) {
+							for(const val of bin_run_frm.get(inp).split(`
+`)) {
+								out+=' --'+inp+' "'+val+'"';
+							}
+						} else {
+							out+=' --'+inp+' "'+bin_run_frm.get(inp)+'"';
+						}
+					}
+					break;
+				case 'flag':
+					if(ielt.checked === true) {
+						out+=' --'+inp;
+					} else {
+						out+=' --no-'+inp;
+					}
+					break;
+			}
+		}
+		// document.getElementById('repack_parse_btn').parentNode.dispatchEvent(new Event('submit'));
+		document.getElementById('repack_parse_btn').click();
+		out=document.getElementById('repack_result').innerHTML+out;
+		document.getElementById('repack_result').innerHTML=out;
+		
+		document.getElementById('bin_run_result').innerHTML=out;
+	}
+document.getElementById('bin_run').addEventListener('submit', function(e) {
+				e.preventDefault();
+				e.target.checkValidity();
+				bin_run_parse(e.target);
+				if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+					&& (window.location.protocol === 'http:' || window.location.protocol === 'https:')
+					&& (window.location.port !== '80' && window.location.port !== '443')) {
+					fetch(window.location.protocol+'//' + window.location.hostname + ':' + window.location.port + '/form', {
+						method: 'POST',
+						body:document.getElementById('repack_result').innerHTML.replace(/run /g, '')
+					})
+						.then(response => response.text())
+						.then(result => {
+							document.getElementById('bin_run_server_response').innerHTML = result;
+						})
+						.catch(error => {
+							document.getElementById('bin_run_server_response').innerHTML = error;
+						});
+				}
+			});
+</script></div><div class="d-none subcmd-container-target" id="target_tricks_container"><form id="bin_tricks">
+<h2>tricks form</h2>
+<div class="form-group">
+	<label for="name" class="form-label">name</label>
+	<span class="input-help">install name of the game</span>
+	<input pa-type="pos" name="name" id="name" required type="text" class="form-control" />
+</div><button id="bin_tricks_parse_btn">Parse</button>
+	<pre id="bin_tricks_result" contenteditable=true ></pre>
+	<pre id="bin_tricks_server_response"></pre>
+</form>
+<script type="text/javascript">
+	function bin_tricks_parse(__form) { 
+		let bin_tricks_frm = new FormData(__form);
+		let out = '';
+		for(const inp of bin_tricks_frm.keys()) {
+			const ielt = document.getElementById(inp);
+			switch(ielt.getAttribute('pa-type')) {
+				case 'pos':
+					if (/[\s!@#$%^&*()_+=[\]{};':"\|,.<>/?]/.test(bin_tricks_frm.get(inp))) {
+						out+=' "'+bin_tricks_frm.get(inp)+'"';
+					} else {
+						out+=' '+bin_tricks_frm.get(inp);
+					}
+					break;
+				case 'opt':
+					if(bin_tricks_frm.get(inp) !== '') {
+						if (ielt.hasAttribute('pa-repeat')) {
+							for(const val of bin_tricks_frm.get(inp).split(`
+`)) {
+								out+=' --'+inp+' "'+val+'"';
+							}
+						} else {
+							out+=' --'+inp+' "'+bin_tricks_frm.get(inp)+'"';
+						}
+					}
+					break;
+				case 'flag':
+					if(ielt.checked === true) {
+						out+=' --'+inp;
+					} else {
+						out+=' --no-'+inp;
+					}
+					break;
+			}
+		}
+		// document.getElementById('repack_parse_btn').parentNode.dispatchEvent(new Event('submit'));
+		document.getElementById('repack_parse_btn').click();
+		out=document.getElementById('repack_result').innerHTML+out;
+		document.getElementById('repack_result').innerHTML=out;
+		
+		document.getElementById('bin_tricks_result').innerHTML=out;
+	}
+document.getElementById('bin_tricks').addEventListener('submit', function(e) {
+				e.preventDefault();
+				e.target.checkValidity();
+				bin_tricks_parse(e.target);
+				if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+					&& (window.location.protocol === 'http:' || window.location.protocol === 'https:')
+					&& (window.location.port !== '80' && window.location.port !== '443')) {
+					fetch(window.location.protocol+'//' + window.location.hostname + ':' + window.location.port + '/form', {
+						method: 'POST',
+						body:document.getElementById('repack_result').innerHTML.replace(/tricks /g, '')
+					})
+						.then(response => response.text())
+						.then(result => {
+							document.getElementById('bin_tricks_server_response').innerHTML = result;
+						})
+						.catch(error => {
+							document.getElementById('bin_tricks_server_response').innerHTML = error;
+						});
+				}
+			});
+</script></div>
+	<script>
+	document.getElementById("target").addEventListener("change", function() {
+		var val = this.value;
+		document.querySelectorAll(".subcmd-container-target").forEach(function(el) {
+			el.classList.add("d-none");
+		});
+		var subcmd = document.getElementById("target_"+val+"_container").classList.remove("d-none");
+	});
+	</script>
+</div>
+</div>
+<script type="text/javascript">
+	function repack_parse(__form) { 
+		let repack_frm = new FormData(__form);
+		let out = './repack';
+		for(const inp of repack_frm.keys()) {
+			const ielt = document.getElementById(inp);
+			switch(ielt.getAttribute('pa-type')) {
+				case 'pos':
+					if (/[\s!@#$%^&*()_+=[\]{};':"\|,.<>/?]/.test(repack_frm.get(inp))) {
+						out+=' "'+repack_frm.get(inp)+'"';
+					} else {
+						out+=' '+repack_frm.get(inp);
+					}
+					break;
+				case 'opt':
+					if(repack_frm.get(inp) !== '') {
+						if (ielt.hasAttribute('pa-repeat')) {
+							for(const val of repack_frm.get(inp).split(`
+`)) {
+								out+=' --'+inp+' "'+val+'"';
+							}
+						} else {
+							out+=' --'+inp+' "'+repack_frm.get(inp)+'"';
+						}
+					}
+					break;
+				case 'flag':
+					if(ielt.checked === true) {
+						out+=' --'+inp;
+					} else {
+						out+=' --no-'+inp;
+					}
+					break;
+			}
+		}
+		document.getElementById('repack_result').innerHTML=out;
+	}
+document.getElementById('repack').addEventListener('submit', function(e) {
+				e.preventDefault();
+				e.target.checkValidity();
+				repack_parse(e.target);
+				if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+					&& (window.location.protocol === 'http:' || window.location.protocol === 'https:')
+					&& (window.location.port !== '80' && window.location.port !== '443')) {
+					fetch(window.location.protocol+'//' + window.location.hostname + ':' + window.location.port + '/form', {
+						method: 'POST',
+						body:document.getElementById('_result').innerHTML.replace(/./repack /g, '')
+					})
+						.then(response => response.text())
+						.then(result => {
+							document.getElementById('repack_server_response').innerHTML = result;
+						})
+						.catch(error => {
+							document.getElementById('repack_server_response').innerHTML = error;
+						});
+				}
+			});
+</script>
